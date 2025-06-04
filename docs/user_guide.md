@@ -158,6 +158,7 @@ go run ./web
   - **title_as_filename**：是否使用文档标题作为文件名（默认为 false，使用文档 token）
   - **use_html_tags**：是否使用 HTML 标签（默认为 false，使用 Markdown 语法）
   - **skip_img_download**：是否跳过图片下载（默认为 false，下载图片）
+- **delta**：当文件已存在时是否跳过下载（默认为 true）
 
 ## 支持的文档元素
 

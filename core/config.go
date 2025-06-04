@@ -22,6 +22,7 @@ type OutputConfig struct {
 	TitleAsFilename bool   `json:"title_as_filename"`
 	UseHTMLTags     bool   `json:"use_html_tags"`
 	SkipImgDownload bool   `json:"skip_img_download"`
+	Delta           bool   `json:"delta"`
 }
 
 func NewConfig(appId, appSecret string) *Config {
@@ -35,6 +36,7 @@ func NewConfig(appId, appSecret string) *Config {
 			TitleAsFilename: false,
 			UseHTMLTags:     false,
 			SkipImgDownload: false,
+			Delta:           true,
 		},
 	}
 }

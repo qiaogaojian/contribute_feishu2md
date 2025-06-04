@@ -24,6 +24,7 @@ type OutputConfig struct {
     TitleAsFilename bool   `json:"title_as_filename"`
     UseHTMLTags     bool   `json:"use_html_tags"`
     SkipImgDownload bool   `json:"skip_img_download"`
+	Delta           bool   `json:"delta"`
 }
 ```
 
@@ -359,7 +360,9 @@ for err := range errChan {
 - 输出目录
 - 图片处理方式
 - 文件命名方式
-- 是否使用 HTML 标签
+- **skip_img_download**：是否跳过图片下载
+- **delta**：当文件已存在时是否跳过下载（默认为 true）
+
 
 ### 3. 支持多种文档类型
 

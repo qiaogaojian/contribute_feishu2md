@@ -107,6 +107,14 @@ func downloadDocument(ctx context.Context, client *core.Client, url string, opts
 		mdName = fmt.Sprintf("%s.md", utils.SanitizeFileName(title))
 	}
 	outputPath := filepath.Join(opts.outputDir, mdName)
+
+	if dlConfig.Output.Delta {
+		if _, err := os.Stat(outputPath); !os.IsNotExist(err) {
+			fmt.Printf("File %s already exists, skipping download.\n", outputPath)
+			return nil
+		}
+	}
+
 	if err = os.WriteFile(outputPath, []byte(result), 0o644); err != nil {
 		return err
 	}
