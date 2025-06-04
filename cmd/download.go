@@ -175,13 +175,19 @@ func downloadWiki(ctx context.Context, client *core.Client, url string) error {
 		return err
 	}
 
-	folderPath, err := client.GetWikiName(ctx, spaceID)
+	// 获取知识库名称，但不用作输出目录
+	wikiName, err := client.GetWikiName(ctx, spaceID)
 	if err != nil {
 		return err
 	}
-	if folderPath == "" {
+	if wikiName == "" {
 		return fmt.Errorf("failed to GetWikiName")
 	}
+
+	// 使用用户指定的输出目录
+	folderPath := dlOpts.outputDir
+	// 打印知识库名称供用户参考
+	fmt.Printf("Downloading wiki: %s to directory: %s\n", wikiName, folderPath)
 
 	errChan := make(chan error)
 
