@@ -21,6 +21,8 @@ type DownloadOpts struct {
 	batch     bool
 	wiki      bool
 	force     bool
+	appId     string
+	appSecret string
 }
 
 var dlOpts = DownloadOpts{}
@@ -265,9 +267,39 @@ func handleDownloadCommand(url string) error {
 	if err != nil {
 		return err
 	}
-	config, err := core.ReadConfigFromFile(configPath)
-	if err != nil {
-		return err
+
+	// 检查配置文件是否存在，如果不存在则创建默认配置
+	var config *core.Config
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		// 创建默认配置，使用命令行传入的appId和appSecret
+		config = core.NewConfig(dlOpts.appId, dlOpts.appSecret)
+		if err = config.WriteConfig2File(configPath); err != nil {
+			return err
+		}
+		fmt.Println("Created default configuration file at: " + configPath)
+		if dlOpts.appId == "" || dlOpts.appSecret == "" {
+			fmt.Println("Please set your AppID and AppSecret using 'feishu2md config' command")
+		}
+	} else {
+		// 读取现有配置
+		config, err = core.ReadConfigFromFile(configPath)
+		if err != nil {
+			return err
+		}
+		// 如果命令行传入了appId或appSecret，则更新配置
+		if dlOpts.appId != "" || dlOpts.appSecret != "" {
+			if dlOpts.appId != "" {
+				config.Feishu.AppId = dlOpts.appId
+			}
+			if dlOpts.appSecret != "" {
+				config.Feishu.AppSecret = dlOpts.appSecret
+			}
+			// 将更新后的配置写回文件
+			if err = config.WriteConfig2File(configPath); err != nil {
+				return err
+			}
+			fmt.Println("Updated configuration with provided AppID and/or AppSecret")
+		}
 	}
 	dlConfig = *config
 

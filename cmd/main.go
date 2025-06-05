@@ -77,6 +77,18 @@ func main() {
 						Usage:       "Force download even if file already exists (ignore delta config)",
 						Destination: &dlOpts.force,
 					},
+					&cli.StringFlag{
+						Name:        "appId",
+						Value:       "",
+						Usage:       "Set app id for the OPEN API",
+						Destination: &dlOpts.appId,
+					},
+					&cli.StringFlag{
+						Name:        "appSecret",
+						Value:       "",
+						Usage:       "Set app secret for the OPEN API",
+						Destination: &dlOpts.appSecret,
+					},
 				},
 				ArgsUsage: "<url>",
 				Action: func(ctx *cli.Context) error {
