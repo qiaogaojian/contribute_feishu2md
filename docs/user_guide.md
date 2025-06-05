@@ -22,6 +22,9 @@ make build
 
 # 构建 Web 服务
 make server
+
+# Windows 下直接使用 go build 命令构建
+go build -o feishu2md.exe ./cmd
 ```
 
 ### 2.3 使用 Docker
