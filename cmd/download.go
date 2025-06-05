@@ -20,6 +20,7 @@ type DownloadOpts struct {
 	dump      bool
 	batch     bool
 	wiki      bool
+	force     bool
 }
 
 var dlOpts = DownloadOpts{}
@@ -108,7 +109,7 @@ func downloadDocument(ctx context.Context, client *core.Client, url string, opts
 	}
 	outputPath := filepath.Join(opts.outputDir, mdName)
 
-	if dlConfig.Output.Delta {
+	if dlConfig.Output.Delta && !opts.force {
 		if _, err := os.Stat(outputPath); !os.IsNotExist(err) {
 			fmt.Printf("File %s already exists, skipping download.\n", outputPath)
 			return nil
@@ -142,7 +143,7 @@ func downloadDocuments(ctx context.Context, client *core.Client, url string) err
 		if err != nil {
 			return err
 		}
-		opts := DownloadOpts{outputDir: folderPath, dump: dlOpts.dump, batch: false}
+		opts := DownloadOpts{outputDir: folderPath, dump: dlOpts.dump, batch: false, force: dlOpts.force}
 		for _, file := range files {
 			if file.Type == "folder" {
 				_folderPath := filepath.Join(folderPath, file.Name)
@@ -227,7 +228,7 @@ func downloadWiki(ctx context.Context, client *core.Client, url string) error {
 				}
 			}
 			if n.ObjType == "docx" {
-				opts := DownloadOpts{outputDir: folderPath, dump: dlOpts.dump, batch: false}
+				opts := DownloadOpts{outputDir: folderPath, dump: dlOpts.dump, batch: false, force: dlOpts.force}
 				wg.Add(1)
 				semaphore <- struct{}{}
 				go func(_url string) {

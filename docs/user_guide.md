@@ -95,6 +95,12 @@ feishu2md dl -o output_directory "https://domain.feishu.cn/docx/docxtoken"
 feishu2md dl --dump "https://domain.feishu.cn/docx/docxtoken"
 ```
 
+强制下载文件（即使文件已存在）：
+
+```bash
+feishu2md dl --force "https://domain.feishu.cn/docx/docxtoken"
+```
+
 ### 批量下载文件夹中的文档
 
 ```bash
@@ -158,7 +164,7 @@ go run ./web
   - **title_as_filename**：是否使用文档标题作为文件名（默认为 false，使用文档 token）
   - **use_html_tags**：是否使用 HTML 标签（默认为 false，使用 Markdown 语法）
   - **skip_img_download**：是否跳过图片下载（默认为 false，下载图片）
-- **delta**：当文件已存在时是否跳过下载（默认为 true）
+  - **delta**：当文件已存在时是否跳过下载（默认为 true，可通过命令行参数 `--force` 覆盖此配置）
 
 ## 支持的文档元素
 

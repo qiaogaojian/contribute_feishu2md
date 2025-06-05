@@ -175,6 +175,12 @@ func (p *Parser) ParseDocxContent(doc *lark.DocxDocument, blocks []*lark.DocxBlo
             Usage:       "Download all documents within the wiki.",
             Destination: &dlOpts.wiki,
         },
+        &cli.BoolFlag{
+            Name:        "force",
+            Value:       false,
+            Usage:       "Force download even if file already exists (ignore delta config)",
+            Destination: &dlOpts.force,
+        },
     },
     Action: func(ctx *cli.Context) error {
         if ctx.NArg() == 0 {
@@ -203,7 +209,7 @@ sequenceDiagram
     participant Parser as 文档解析器
     participant FS as 文件系统
     
-    User->>CLI: 输入文档URL
+    User->>CLI: 输入文档URL和参数
     CLI->>Client: 验证URL并获取Token
     Client->>+Client: GetDocxContent(token)
     Client->>-CLI: 返回文档内容和块
@@ -213,8 +219,13 @@ sequenceDiagram
     Parser->>-CLI: 返回Markdown文本
     CLI->>Client: 下载文档中的图片
     Client->>FS: 保存图片
-    CLI->>FS: 保存Markdown文件
-    CLI->>User: 显示完成信息
+    
+    alt delta=true 且 force=false 且 文件已存在
+        CLI->>User: 跳过下载，显示文件已存在信息
+    else
+        CLI->>FS: 保存Markdown文件
+        CLI->>User: 显示完成信息
+    end
 ```
 
 ### 2. 批量下载流程

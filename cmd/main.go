@@ -71,6 +71,12 @@ func main() {
 						Usage:       "Download all documents within the wiki.",
 						Destination: &dlOpts.wiki,
 					},
+					&cli.BoolFlag{
+						Name:        "force",
+						Value:       false,
+						Usage:       "Force download even if file already exists (ignore delta config)",
+						Destination: &dlOpts.force,
+					},
 				},
 				ArgsUsage: "<url>",
 				Action: func(ctx *cli.Context) error {
