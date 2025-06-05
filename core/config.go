@@ -33,7 +33,7 @@ func NewConfig(appId, appSecret string) *Config {
 		},
 		Output: OutputConfig{
 			ImageDir:        "static",
-			TitleAsFilename: false,
+			TitleAsFilename: true,
 			UseHTMLTags:     false,
 			SkipImgDownload: false,
 			Delta:           true,
