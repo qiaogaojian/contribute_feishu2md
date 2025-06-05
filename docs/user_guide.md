@@ -1,225 +1,219 @@
 # feishu2md 用户指南
 
-## 简介
+## 1. 简介
 
-feishu2md 是一个将飞书文档转换为 Markdown 格式的工具，支持命令行和 Web 界面两种使用方式。本指南将详细介绍如何安装和使用该工具。
+feishu2md 是一个将飞书文档转换为 Markdown 格式的工具，支持通过命令行或 Web 服务的方式使用。它可以下载单个飞书文档、批量下载文件夹中的文档或下载整个知识库的文档，并将其转换为 Markdown 格式。
 
-## 安装
+## 2. 安装
 
-### 方法一：下载预编译的二进制文件
+### 2.1 二进制安装
 
-1. 访问 [GitHub Releases](https://github.com/Wsine/feishu2md/releases) 页面
-2. 下载适合您操作系统的二进制文件
-3. 将下载的文件放置在系统 PATH 路径中
+从 [GitHub Releases](https://github.com/Wsine/feishu2md/releases) 下载适合您平台的预编译二进制文件，解压后放置在系统 PATH 路径中。
 
-### 方法二：使用 Docker
-
-```bash
-# 直接运行
-docker run -it --rm -p 8080:8080 -e FEISHU_APP_ID=<your id> -e FEISHU_APP_SECRET=<your secret> -e GIN_MODE=release wwwsine/feishu2md
-
-# 或使用 Docker Compose
-# 创建 docker-compose.yml 文件：
-# version: '3'
-# services:
-#   feishu2md:
-#     image: wwwsine/feishu2md
-#     environment:
-#       FEISHU_APP_ID: <your id>
-#       FEISHU_APP_SECRET: <your secret>
-#       GIN_MODE: release
-#     ports:
-#       - "8080:8080"
-
-docker compose up -d
-```
-
-### 方法三：从源码编译
+### 2.2 从源码构建
 
 ```bash
 # 克隆仓库
 git clone https://github.com/Wsine/feishu2md.git
 cd feishu2md
 
-# 编译
-go build -o feishu2md ./cmd
+# 构建命令行工具
+make build
 
-# 安装到系统路径
-go install ./cmd
+# 构建 Web 服务
+make server
 ```
 
-## 获取飞书 API Token
-
-在使用 feishu2md 之前，您需要获取飞书的 API Token（AppID 和 AppSecret）：
-
-1. 进入飞书[开发者后台](https://open.feishu.cn/app)
-2. 创建企业自建应用（个人版），信息随意填写
-3. **重要**：打开权限管理，开通以下必要的权限：
-   - 「查看新版文档」权限 `docx:document:readonly`
-   - 「下载云文档中的图片和附件」权限 `docs:document.media:download`
-   - 「查看、评论、编辑和管理云空间中所有文件」权限 `drive:file:readonly`
-   - 「查看知识库」权限 `wiki:wiki:readonly`
-4. 打开凭证与基础信息，获取 App ID 和 App Secret
-
-## 命令行使用方式
-
-### 配置
-
-首次使用前，需要配置 AppID 和 AppSecret：
+### 2.3 使用 Docker
 
 ```bash
+docker run -it --rm -p 8080:8080 -e FEISHU_APP_ID=<your id> -e FEISHU_APP_SECRET=<your secret> -e GIN_MODE=release wwwsine/feishu2md
+```
+
+## 3. 配置
+
+### 3.1 获取飞书 API 凭据
+
+1. 访问[飞书开发者平台](https://open.feishu.cn/app)
+2. 创建一个企业自建应用（信息可以任意填写）
+3. 发布应用（无需等待审核通过）
+4. 在应用页面中，找到「凭证与基础信息」，获取 App ID 和 App Secret
+
+### 3.2 配置工具
+
+#### 命令行方式
+
+```bash
+# 生成配置文件并设置 App ID 和 App Secret
 feishu2md config --appId <your_app_id> --appSecret <your_app_secret>
-```
 
-查看当前配置：
-
-```bash
+# 查看当前配置
 feishu2md config
 ```
 
-### 下载单个文档
+#### 手动编辑配置文件
 
-```bash
-feishu2md dl "https://domain.feishu.cn/docx/docxtoken"
-```
+配置文件位置：
+- Windows: `%AppData%/feishu2md/config.json`
+- Linux: `$XDG_CONFIG_HOME/feishu2md/config.json` 或 `~/.config/feishu2md/config.json`
+- Mac: `$XDG_CONFIG_HOME/feishu2md/config.json` 或 `~/.config/feishu2md/config.json`
 
-指定输出目录：
-
-```bash
-feishu2md dl -o output_directory "https://domain.feishu.cn/docx/docxtoken"
-```
-
-保存 API 响应的 JSON 数据（用于调试）：
-
-```bash
-feishu2md dl --dump "https://domain.feishu.cn/docx/docxtoken"
-```
-
-强制下载文件（即使文件已存在）：
-
-```bash
-feishu2md dl --force "https://domain.feishu.cn/docx/docxtoken"
-```
-
-### 批量下载文件夹中的文档
-
-```bash
-feishu2md dl --batch -o output_directory "https://domain.feishu.cn/drive/folder/foldertoken"
-```
-
-### 批量下载知识库中的文档
-
-```bash
-feishu2md dl --wiki -o output_directory "https://domain.feishu.cn/wiki/settings/123456789101112"
-```
-
-## Web 界面使用方式
-
-### 启动 Web 服务
-
-如果您使用 Docker 或在线版本，Web 服务已经启动。如果您使用二进制文件或从源码编译，需要手动启动 Web 服务：
-
-```bash
-# 确保已配置 AppID 和 AppSecret
-feishu2md config --appId <your_app_id> --appSecret <your_app_secret>
-
-# 启动 Web 服务
-go run ./web
-```
-
-### 使用 Web 界面
-
-1. 打开浏览器，访问 `http://localhost:8080`（或您配置的其他地址）
-2. 在输入框中粘贴飞书文档链接
-3. 点击「下载」按钮
-4. 浏览器将自动下载转换后的 Markdown 文件（以 ZIP 格式压缩）
-
-## 配置文件详解
-
-配置文件位于用户配置目录下的 `feishu2md/config.json`，包含以下配置项：
+配置文件格式：
 
 ```json
 {
   "feishu": {
-    "app_id": "your_app_id",
-    "app_secret": "your_app_secret"
+    "app_id": "飞书应用的App ID",
+    "app_secret": "飞书应用的App Secret"
   },
   "output": {
-    "image_dir": "static",
-    "title_as_filename": false,
-    "use_html_tags": false,
-    "skip_img_download": false
+    "image_dir": "static",       // 图片保存目录
+    "title_as_filename": true,   // 使用文档标题作为文件名
+    "use_html_tags": false,      // 使用HTML标签而非Markdown语法
+    "skip_img_download": false,  // 跳过图片下载
+    "delta": true               // 增量下载，跳过已存在的文件
   }
 }
 ```
 
-### 配置项说明
+## 4. 使用方法
 
-- **feishu**：飞书 API 配置
-  - **app_id**：飞书应用的 AppID
-  - **app_secret**：飞书应用的 AppSecret
+### 4.1 命令行使用
 
-- **output**：输出配置
-  - **image_dir**：图片保存的目录，相对于 Markdown 文件
-  - **title_as_filename**：是否使用文档标题作为文件名（默认为 false，使用文档 token）
-  - **use_html_tags**：是否使用 HTML 标签（默认为 false，使用 Markdown 语法）
-  - **skip_img_download**：是否跳过图片下载（默认为 false，下载图片）
-  - **delta**：当文件已存在时是否跳过下载（默认为 true，可通过命令行参数 `--force` 覆盖此配置）
+#### 查看帮助
 
-## 支持的文档元素
+```bash
+# 查看主命令帮助
+feishu2md --help
 
- feishu2md 支持转换以下飞书文档元素：
+# 查看配置命令帮助
+feishu2md config --help
 
-- 标题（一级到九级）
-- 段落文本
-- 加粗、斜体、删除线、下划线
-- 有序列表和无序列表
-- 代码块（支持多种语言的语法高亮）
-- 表格
-- 图片
-- 引用
-- 数学公式
-- 待办事项（任务列表）
-- 分割线
-- 链接
+# 查看下载命令帮助
+feishu2md dl --help
+```
 
-## 常见问题
+#### 下载单个文档
 
-### 1. 无法获取文档内容
+```bash
+# 下载单个文档到当前目录
+feishu2md dl "https://domain.feishu.cn/docx/docxtoken"
 
-**问题**：使用工具时提示无法获取文档内容。
+# 下载单个文档到指定目录
+feishu2md dl -o output_directory "https://domain.feishu.cn/docx/docxtoken"
 
-**解决方案**：
-- 确认您已正确配置 AppID 和 AppSecret
-- 确认您已开通所有必要的权限
-- 确认文档链接是有效的，且您有权限访问该文档
-- 确认文档链接是通过「分享 > 开启链接分享 > 复制链接」获得的
+# 下载单个文档并导出 API 响应的 JSON 数据
+feishu2md dl --dump "https://domain.feishu.cn/docx/docxtoken"
 
-### 2. 图片无法显示
+# 使用命令行提供的 App ID 和 App Secret 下载文档
+feishu2md dl --appId <your_app_id> --appSecret <your_app_secret> "https://domain.feishu.cn/docx/docxtoken"
+```
 
-**问题**：转换后的 Markdown 文件中的图片无法显示。
+#### 批量下载文件夹中的文档
 
-**解决方案**：
-- 确认您已开通「下载云文档中的图片和附件」权限
-- 确认您没有设置 `skip_img_download` 为 true
-- 检查图片文件是否已下载到指定的 `image_dir` 目录中
+```bash
+# 批量下载文件夹中的所有文档
+feishu2md dl --batch "https://domain.feishu.cn/drive/folder/foldertoken"
 
-### 3. 批量下载失败
+# 批量下载文件夹中的所有文档到指定目录
+feishu2md dl --batch -o output_directory "https://domain.feishu.cn/drive/folder/foldertoken"
+```
 
-**问题**：批量下载文件夹或知识库时失败。
+#### 下载知识库中的文档
 
-**解决方案**：
-- 确认您已开通「查看、评论、编辑和管理云空间中所有文件」和「查看知识库」权限
-- 确认文件夹或知识库链接是有效的，且您有权限访问
-- 对于大型文件夹或知识库，可能需要更长的处理时间，请耐心等待
+```bash
+# 下载知识库中的所有文档
+feishu2md dl --wiki "https://domain.feishu.cn/wiki/settings/123456789101112"
 
-## 限制和注意事项
+# 下载知识库中的所有文档到指定目录
+feishu2md dl --wiki -o output_directory "https://domain.feishu.cn/wiki/settings/123456789101112"
+```
 
-- 飞书旧版文档（docs）不再支持，请使用新版文档（docx）
-- 批量下载功能暂不支持 Docker 版本
-- 在线版本不保存任何文档资料和图片在容器中，但 Render 平台的 Log 可能会记录一些 HTTP 信息
-- 转换后的 Markdown 文件可能与原文档的排版略有不同，特别是对于复杂的表格和布局
+### 4.2 Web 服务使用
 
-## 贡献和反馈
+#### 启动 Web 服务
 
-如果您发现任何问题或有改进建议，欢迎在 [GitHub Issues](https://github.com/Wsine/feishu2md/issues) 中提出，或提交 Pull Request。
+```bash
+# 使用环境变量设置 App ID 和 App Secret
+export FEISHU_APP_ID=<your_app_id>
+export FEISHU_APP_SECRET=<your_app_secret>
+
+# 启动 Web 服务
+./feishu2md4web
+```
+
+或者使用 Docker：
+
+```bash
+docker run -it --rm -p 8080:8080 -e FEISHU_APP_ID=<your id> -e FEISHU_APP_SECRET=<your secret> -e GIN_MODE=release wwwsine/feishu2md
+```
+
+#### 使用 Web 界面
+
+1. 在浏览器中访问 `http://localhost:8080`
+2. 在输入框中粘贴飞书文档的 URL
+3. 点击下载按钮
+4. 根据文档是否包含图片，浏览器会下载 Markdown 文件或包含 Markdown 和图片的 ZIP 文件
+
+## 5. 注意事项
+
+### 5.1 URL 格式
+
+- 文档 URL 格式：`https://domain.feishu.cn/docx/docxtoken`
+- 文件夹 URL 格式：`https://domain.feishu.cn/drive/folder/foldertoken`
+- 知识库 URL 格式：`https://domain.feishu.cn/wiki/settings/wikitoken`
+
+### 5.2 权限要求
+
+确保您的飞书应用具有以下权限：
+
+- 查看、评论和编辑文档
+- 查看和下载云空间中的文件
+- 访问和管理知识库
+
+### 5.3 常见问题
+
+#### 无法下载文档
+
+- 检查 App ID 和 App Secret 是否正确
+- 确认文档 URL 格式是否正确
+- 确认您有权限访问该文档
+- 检查飞书应用是否具有必要的权限
+
+#### 图片无法显示
+
+- 确认 `skip_img_download` 配置项为 `false`
+- 检查图片目录是否存在且可写
+- 确认 Markdown 查看器能够正确解析相对路径的图片
+
+## 6. 高级用法
+
+### 6.1 自定义输出格式
+
+编辑配置文件中的 `output` 部分：
+
+```json
+"output": {
+  "image_dir": "custom_images",  // 自定义图片目录
+  "title_as_filename": true,     // 使用文档标题作为文件名
+  "use_html_tags": true,        // 使用HTML标签而非Markdown语法
+  "skip_img_download": false,   // 是否跳过图片下载
+  "delta": false                // 是否跳过已存在的文件
+}
+```
+
+### 6.2 与其他工具集成
+
+可以将 feishu2md 集成到自动化工作流中，例如：
+
+```bash
+# 下载文档并使用 pandoc 转换为其他格式
+feishu2md dl "https://domain.feishu.cn/docx/docxtoken" -o temp/
+pandoc -f markdown -t html temp/docxtoken.md -o output.html
+
+# 批量下载知识库并推送到 Git 仓库
+feishu2md dl --wiki -o docs/ "https://domain.feishu.cn/wiki/settings/wikitoken"
+git add docs/
+git commit -m "Update documentation"
+git push
+```
