@@ -158,8 +158,17 @@ func (p *Parser) ParseDocxBlock(b *lark.DocxBlock, indentLevel int) string {
 	case lark.DocxBlockTypeOrdered:
 		buf.WriteString(p.ParseDocxBlockOrdered(b, indentLevel))
 	case lark.DocxBlockTypeCode:
-		buf.WriteString("```" + DocxCodeLang2MdStr[b.Code.Style.Language] + "\n")
-		buf.WriteString(strings.TrimSpace(p.ParseDocxBlockText(b.Code)))
+		// 代码块不应该有缩进，因为缩进会破坏markdown格式
+		// 重置buffer，移除之前添加的缩进
+		buf.Reset()
+
+		mdLang := DocxCodeLang2MdStr[b.Code.Style.Language]
+		buf.WriteString("```" + mdLang + "\n")
+
+		codeText := p.ParseDocxBlockText(b.Code)
+		codeText = strings.ReplaceAll(codeText, "```", "")
+		trimmedCode := strings.TrimSuffix(codeText, "\n")
+		buf.WriteString(trimmedCode)
 		buf.WriteString("\n```\n")
 	case lark.DocxBlockTypeQuote:
 		buf.WriteString("> ")
